@@ -21,6 +21,24 @@ def get_kernel_size(filter_name="sobel"):
         
         return Gx, Gy, 3
     
+    elif filter_name == "sobel_5x5":
+            Gx = np.array([
+                [-2, -3, 0, 3, 2],
+                [-4, -6, 0, 6, 4],
+                [-5, -8, 0, 8, 5],
+                [-4, -6, 0, 6, 4],
+                [-2, -3, 0, 3, 2]
+            ], dtype=np.float32)
+            
+            Gy = np.array([
+                [-2, -4, -5, -4, -2],
+                [-3, -6, -8, -6, -3],
+                [0, 0, 0, 0, 0],
+                [3, 6, 8, 6, 3],
+                [2, 4, 5, 4, 2]
+            ], dtype=np.float32)
+            return Gx, Gy, 5
+    
     elif filter_name == "prewitt":
         Gx = np.array([[1.0, 0.0, -1.0], 
                         [1.0, 0.0, -1.0], 
@@ -50,8 +68,8 @@ def edge_operator(img, filter_name="sobel"):
     
     for i in range(w - kernel_size + 1):
         for j in range(h - kernel_size + 1):
-            gx = np.sum(np.multiply(Gx, img[i:i + kernel_size, j:j + kernel_size])) /  kernel_size  # x direction
-            gy = np.sum(np.multiply(Gy, img[i:i + kernel_size, j:j + kernel_size])) /  kernel_size  # y direction
+            gx = np.sum(np.multiply(Gx, img_gray[i:i + kernel_size, j:j + kernel_size])) /  2 * kernel_size  # x direction
+            gy = np.sum(np.multiply(Gy, img_gray[i:i + kernel_size, j:j + kernel_size])) /  2 * kernel_size  # y direction
             mag = np.sqrt(gx ** 2 + gy ** 2) # magnitude
             print(gx)
             print(gy)
@@ -59,6 +77,7 @@ def edge_operator(img, filter_name="sobel"):
             magnimtude_img[i + 1, j + 1] =  mag
             mag_list.append(mag)
                 
+    cv.imwrite(f"gray.png", img_gray)
     cv.imwrite(f"result/gx_{filter_name}.png", x_img)
     cv.imwrite(f"result/gy_{filter_name}.png", y_img)
     cv.imwrite(f"result/mag_{filter_name}.png", magnimtude_img)
@@ -68,7 +87,7 @@ def edge_operator(img, filter_name="sobel"):
 
 
 
-def edge_detection(img_path, filter_name="sobel", threshold=400):
+def edge_detection(img_path, filter_name="sobel", threshold=150):
     img = cv.imread(img_path)
     magnimtude_img = edge_operator(img, filter_name) 
     edge_img = np.where(magnimtude_img > threshold, 255, 0).astype(np.uint8)
@@ -78,4 +97,4 @@ def edge_detection(img_path, filter_name="sobel", threshold=400):
 
 img_path = "img\lena.jpg"
 edge_detection(img_path)
-edge_detection(img_path, "prewitt")
+edge_detection(img_path, "sobel_5x5")
